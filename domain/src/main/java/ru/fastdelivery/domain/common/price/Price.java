@@ -3,6 +3,7 @@ package ru.fastdelivery.domain.common.price;
 import ru.fastdelivery.domain.common.currency.Currency;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * @param amount   значение цены
@@ -22,7 +23,7 @@ public record Price(
     }
 
     public Price multiply(BigDecimal amount) {
-        return new Price(this.amount.multiply(amount), this.currency);
+        return new Price(this.amount.multiply(amount).setScale(2, RoundingMode.HALF_UP), this.currency);
     }
 
     public Price max(Price price) {

@@ -3,5 +3,14 @@ currency:
     - "RUB"
 cost:
   rub:
-    perKg: 400
+    perKg: 427.18
+    perKubM: 4233.57
     minimal: 350
+
+boundary-coordinates:
+  latitude:
+    min-value:  45.0
+    max-value:  65.0
+  longitude:
+    min-value:  30.0
+    max-value:  96.0
