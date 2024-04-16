@@ -2,6 +2,7 @@ package ru.fastdelivery.domain.delivery.shipment;
 
 import ru.fastdelivery.domain.common.currency.Currency;
 import ru.fastdelivery.domain.common.dimension.PackVolume;
+import ru.fastdelivery.domain.common.route.Route;
 import ru.fastdelivery.domain.common.weight.Weight;
 import ru.fastdelivery.domain.delivery.pack.Pack;
 
@@ -12,10 +13,12 @@ import java.util.List;
 /**
  * @param packages упаковки в грузе
  * @param currency валюта объявленная для груза
+ * @param route маршрут перевозки
  */
 public record Shipment(
         List<Pack> packages,
-        Currency currency
+        Currency currency,
+        Route route
 ) {
     public Weight weightAllPackages() {
         return packages.stream()
@@ -29,5 +32,9 @@ public record Shipment(
                 .map(PackVolume::cubicmeters)
                 .reduce(0.0, Double::sum);
         return new BigDecimal(Double.toString(totalVolume)).setScale(4, RoundingMode.HALF_UP);
+    }
+
+    public int routeLength () {
+        return this.route.distance();
     }
 }

@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.fastdelivery.domain.common.currency.CurrencyFactory;
 import ru.fastdelivery.domain.common.dimension.LinearDimension;
 import ru.fastdelivery.domain.common.dimension.PackVolume;
+import ru.fastdelivery.domain.common.route.GeoPoint;
+import ru.fastdelivery.domain.common.route.GeoPointFactory;
+import ru.fastdelivery.domain.common.route.Route;
 import ru.fastdelivery.domain.common.weight.Weight;
 import ru.fastdelivery.domain.delivery.pack.Pack;
 import ru.fastdelivery.domain.delivery.shipment.Shipment;
@@ -31,6 +34,7 @@ import java.util.List;
 public class CalculateController {
     private final TariffCalculateUseCase tariffCalculateUseCase;
     private final CurrencyFactory currencyFactory;
+    private final GeoPointFactory geoPointFactory;
 
     @PostMapping
     @Operation(summary = "Расчет стоимости по упаковкам груза")
@@ -41,19 +45,25 @@ public class CalculateController {
     public CalculatePackagesResponse calculate(
             @Valid @RequestBody CalculatePackagesRequest request) {
 
+        var shipment = mapperRequestToShipment(request);
+        var calculatedPrice = tariffCalculateUseCase.calc(shipment);
+        var minimalPrice = tariffCalculateUseCase.minimalPrice();
+        return new CalculatePackagesResponse(calculatedPrice, minimalPrice);
+    }
+
+    private Shipment mapperRequestToShipment(CalculatePackagesRequest request) {
         List<Pack> packList = new ArrayList<>();
         for (CargoPackage cargoPackage : request.packages()) {
             Weight weight = new Weight(cargoPackage.weight());
             PackVolume volume = new PackVolume(new LinearDimension(cargoPackage.length()),
                     new LinearDimension(cargoPackage.width()), new LinearDimension(cargoPackage.height()));
-            Pack pack = new Pack(weight, volume);
-            packList.add(pack);
+            packList.add(new Pack(weight, volume));
         }
+        GeoPoint departure = geoPointFactory.create(request.departure().latitude(), request.departure().longitude());
+        GeoPoint destination = geoPointFactory.create(request.destination().latitude(), request.destination().longitude());
+        Route route = new Route(departure, destination);
 
-        var shipment = new Shipment(packList, currencyFactory.create(request.currencyCode()));
-        var calculatedPrice = tariffCalculateUseCase.calc(shipment);
-        var minimalPrice = tariffCalculateUseCase.minimalPrice();
-        return new CalculatePackagesResponse(calculatedPrice, minimalPrice);
+        return new Shipment(packList, currencyFactory.create(request.currencyCode()), route);
     }
 }
 

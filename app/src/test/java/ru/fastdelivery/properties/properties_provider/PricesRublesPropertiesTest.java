@@ -1,4 +1,4 @@
-package ru.fastdelivery.properties_provider;
+package ru.fastdelivery.properties.properties_provider;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

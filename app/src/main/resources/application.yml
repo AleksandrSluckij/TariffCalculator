@@ -8,9 +8,7 @@ cost:
     minimal: 350
 
 boundary-coordinates:
-  latitude:
-    min-value:  45.0
-    max-value:  65.0
-  longitude:
-    min-value:  30.0
-    max-value:  96.0
+  latitude-min-value:  45.0
+  latitude-max-value:  65.0
+  longitude-min-value:  30.0
+  longitude-max-value:  96.0

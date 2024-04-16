@@ -5,23 +5,35 @@ import ru.fastdelivery.domain.common.price.Price;
 import ru.fastdelivery.domain.delivery.shipment.Shipment;
 
 import javax.inject.Named;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Named
 @RequiredArgsConstructor
 public class TariffCalculateUseCase {
-    private final WeightPriceProvider weightPriceProvider;
+    private final PriceProvider priceProvider;
 
     public Price calc(Shipment shipment) {
-        var weightCalculatedPrice = weightPriceProvider.costPerKg().multiply(shipment.weightAllPackages().kilograms());
-        var volumeCalculatedPrice = weightPriceProvider.costPerKubM().multiply(shipment.volumeAllPackages());
-        var minimalPrice = weightPriceProvider.minimalPrice();
+        var weightCalculatedPrice = priceProvider.costPerKg().multiply(shipment.weightAllPackages().kilograms());
+        var volumeCalculatedPrice = priceProvider.costPerKubM().multiply(shipment.volumeAllPackages());
+        var minimalPrice = priceProvider.minimalPrice();
+        var basePrice = weightCalculatedPrice.max(volumeCalculatedPrice).max(minimalPrice);
+        return  routePriceCorrection(shipment.routeLength(), basePrice);
+    }
 
-        return weightCalculatedPrice
-                .max(volumeCalculatedPrice)
-                .max(minimalPrice);
+    Price routePriceCorrection(int routeLength, Price basePrice) {
+        final int MIN_ROUTE_LENGTH = 450;       // Move to config?
+        if (routeLength > MIN_ROUTE_LENGTH) {
+            var amountCorrected = basePrice.amount()
+                    .multiply(BigDecimal.valueOf((double) routeLength / MIN_ROUTE_LENGTH))
+                    .setScale(2, RoundingMode.CEILING);
+            basePrice = new Price(amountCorrected, basePrice.currency());
+        }
+        return basePrice;
     }
 
     public Price minimalPrice() {
-        return weightPriceProvider.minimalPrice();
+        return priceProvider.minimalPrice();
     }
+
 }
