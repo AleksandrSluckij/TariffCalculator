@@ -10,7 +10,6 @@ import java.math.RoundingMode;
  * @param width     - ширина, мм
  * @param height    - высота, мм
  */
-
 public record PackVolume(LinearDimension length, LinearDimension width, LinearDimension height) {
 
     public Double cubicmeters() {

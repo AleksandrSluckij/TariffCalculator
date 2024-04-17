@@ -12,6 +12,7 @@ public class GeoPointFactory {
   private static final double PI = 3.14159265358979;
 
   /**
+   * Создание географической точки (пункта) по ее координатам
    *
    * @param latitude широта точки в градусах
    * @param longitude долгота точки в градусах
@@ -19,10 +20,10 @@ public class GeoPointFactory {
    */
   public GeoPoint create (double latitude, double longitude) {
     if (provider.outOfLatitudeLimits(latitude)) {
-      throw new IllegalArgumentException("Latitude value is out of limits!");
+      throw new IllegalArgumentException("Latitude value is out of limits or not set!");
     }
     if (provider.outOfLongitudeLimits(longitude)) {
-      throw new IllegalArgumentException("Longitude value is out of limits!");
+      throw new IllegalArgumentException("Longitude value is out of limits or not set!");
     }
 
     return new GeoPoint(radianValue(latitude), radianValue(longitude));
